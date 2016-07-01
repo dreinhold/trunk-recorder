@@ -6,30 +6,36 @@ SmartnetParser::SmartnetParser() {
 	lastcmd = 0;
 }
 double SmartnetParser::getfreq(int cmd) {
-
-
-/* Different Systems will have different band plans. Below is the one for WMATA which is a bit werid:*/
- /*       if (cmd < 0x12e) {
-                freq = float((cmd) * 0.025 + 489.0875);
-        } else if (cmd < 0x2b0) {
-                freq = float((cmd-380) * 0.025 + 489.0875);
-        } else {
-                freq = 0;
-        }
-      cout << "CMD: 0x" <<  hex << cmd << " Freq: " << freq << " Multi: " << (cmd - 308) * 0.025 << " CMD: " << dec << cmd << endl; 
-*/
 	float freq;
-	if (cmd < 0x1b8) {
-		freq = float(cmd * 0.025 + 851.0125);
-	} else if (cmd < 0x230) {
-		freq = float(cmd * 0.025 + 851.0125 - 10.9875);
-	} else {
+	if (cmd <= 0x2cf ) {
+		freq = 851.0125 + (0.025 * ((float) cmd));
+	} else if (cmd <= 0x2f7 ) {
+		freq = 866.0000 + (0.025 * ((float) (cmd-0x2d0)));
+	} else if (cmd >= 0x32f && cmd <= 0x33f ) {
+		freq = 867.0000 + (0.025 * ((float) (cmd-0x32f)));
+	} else if (cmd >= 0x3c1 && cmd <= 0x3fe ) {
+		freq = 867.4250 + (0.025 * ((float) (cmd-0x3c1)));
+	} else if( cmd == 0x3BE ) {
+		freq = 868.9750;
+	} else { 
+		cout << "Error No Frequency found for Channel " << hex << cmd << dec << "\n";
 		freq = 0;
 	}
-
 	return freq*1000000;
 }
 
+
+bool SmartnetParser::isfreq(int cmd) {
+	/* Check if cmd could be a valid SmartNet channel */
+        if((cmd >= 0 && cmd <= 0x2F7) ||
+	   (cmd >= 0x32f && cmd <= 0x33F) ||
+	   (cmd >= 0x3c1 && cmd <= 0x3FE) ||
+	   cmd == 0x3BE ) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 
 std::vector<TrunkMessage> SmartnetParser::parse_message(std::string s) {
@@ -58,7 +64,7 @@ std::vector<TrunkMessage> SmartnetParser::parse_message(std::string s) {
 	if ((address & 0xfc00) == 0x2800) {
 		message.sysid = lastaddress;
 		message.message_type = SYSID;
-	} else if (command < 0x2d0) {
+	} else if ( isfreq(command) ) {
 		message.talkgroup = address;
 		message.freq = getfreq(command);
 		if ( lastcmd == 0x308 || lastcmd == 0x321 ) { // Include digital
