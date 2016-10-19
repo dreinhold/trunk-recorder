@@ -16,6 +16,7 @@ class SmartnetParser:public TrunkParser
 public:
 	SmartnetParser();
 	double getfreq(int cmd);
+        bool isfreq(int cmd);
 	std::vector<TrunkMessage> parse_message(std::string s);
 };
 #endif
