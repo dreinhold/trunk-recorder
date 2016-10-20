@@ -108,6 +108,9 @@ analog_recorder::analog_recorder(Source *src)
 
 	wav_sink = gr::blocks::wavfile_sink::make(filename,1,8000,16);
 
+// Try and get rid of the FSK wobbl
+     high_f_taps =  gr::filter::firdes::high_pass(1, 8000, 300, 50, gr::filter::firdes::WIN_HANN);
+     high_f = gr::filter::fir_filter_fff::make(1, high_f_taps);
 
 
     if (squelch_db!=0) {	
@@ -119,7 +122,8 @@ analog_recorder::analog_recorder(Source *src)
  		connect(squelch, 0,	demod, 0);
  		connect(demod, 0, deemph, 0);
  		connect(deemph, 0, decim_audio, 0);
- 		connect(decim_audio, 0, squelch_two, 0);
+                connect(decim_audio, 0, high_f, 0);
+                connect(high_f, 0, squelch_two, 0);
  		connect(squelch_two, 0, wav_sink, 0);
  	   } else {
  		// No squelch used
