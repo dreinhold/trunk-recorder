@@ -24,6 +24,10 @@ public:
         int retune_attempts;
         time_t last_message_time;
         std::string bandplan;
+        int bandfreq;
+        double bandplan_base;
+        double bandplan_spacing;
+        int bandplan_offset;
 
         std::vector<double> control_channels;
         int current_control_channel;
@@ -63,5 +67,13 @@ public:
         System(int sys_id );
         void set_bandplan(std::string);
         std::string get_bandplan();
+        void set_bandfreq(int);
+        int get_bandfreq();
+        void set_bandplan_base(double);
+        double get_bandplan_base();
+        void set_bandplan_spacing(double);
+        double get_bandplan_spacing();
+        void set_bandplan_offset(int);
+        int get_bandplan_offset();
 };
 #endif

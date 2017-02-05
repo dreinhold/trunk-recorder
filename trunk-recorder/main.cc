@@ -181,8 +181,22 @@ void load_config()
       systems.push_back(system);
 
       system->set_bandplan(node.second.get<std::string>("bandplan", "800_Reband"));
+      system->set_bandfreq(800); // Default to 800
+      if(boost::starts_with(system->get_bandplan(), "400")) {
+          system->set_bandfreq(400);
+      }
+      system->set_bandplan_base(node.second.get<double>("bandplan_base", 0.0));
+      system->set_bandplan_spacing(node.second.get<double>("bandplan_spacing", 0.0));
+      system->set_bandplan_offset(node.second.get<int>("bandplan_offset",0));
+
       if(system->get_system_type() == "smartnet") {
           BOOST_LOG_TRIVIAL(info) << "Smartnet bandplan: " << system->get_bandplan();
+          BOOST_LOG_TRIVIAL(info) << "Smartnet band: " << system->get_bandfreq();
+          if(system->get_bandplan_base() || system->get_bandplan_spacing() || system->get_bandplan_offset() ) {
+              BOOST_LOG_TRIVIAL(info) << "Smartnet bandplan base: " << system->get_bandplan_base();
+              BOOST_LOG_TRIVIAL(info) << "Smartnet bandplan spacing: " << system->get_bandplan_spacing();
+              BOOST_LOG_TRIVIAL(info) << "Smartnet bandplan offset: " << system->get_bandplan_offset();
+          }
       }
     }
     config.capture_dir = pt.get<std::string>("captureDir", boost::filesystem::current_path().string());
@@ -878,7 +892,7 @@ void monitor_messages() {
 
       if (sys) {
         if (sys->get_system_type() == "smartnet") {
-          trunk_messages = smartnet_parser->parse_message(msg->to_string(), sys->get_bandplan());
+          trunk_messages = smartnet_parser->parse_message(msg->to_string(), sys);
           handle_message(trunk_messages, sys);
         }
 
