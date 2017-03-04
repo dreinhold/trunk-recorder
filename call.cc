@@ -21,6 +21,7 @@ Call::Call(long t, double f, std::string capture_dir) {
 	tdma = false;
 	encrypted = false;
 	emergency = false;
+	analog = false;
     src_count = 0;
     this->create_filename(capture_dir);
 }
@@ -36,6 +37,7 @@ Call::Call(TrunkMessage message, std::string capture_dir) {
 	encrypted = message.encrypted;
 	emergency = message.emergency;
 	src_count = 0;
+	analog = false;
     this->create_filename(capture_dir);
     this->add_source(message.source);
 }
@@ -56,6 +58,7 @@ void Call::end_call() {
                 {
                     myfile << "{\n";
                     myfile << "\"freq\": " << this->freq << ",\n";
+                    myfile << "\"analog\": " << this->analog << ",\n";
                     myfile << "\"emergency\": " << this->emergency << ",\n";
                     myfile << "\"talkgroup\": " << this->talkgroup << ",\n";
                     myfile << "\"srcList\": [ ";
@@ -138,6 +141,12 @@ bool  Call::get_debug_recording() {
 }
 void  Call::set_recording(bool m) {
 	recording = m;
+}
+void  Call::set_analog() {
+	analog = true;
+}
+bool  Call::get_analog() {
+        return analog;
 }
 bool  Call::get_recording() {
 	return recording;

@@ -16,6 +16,7 @@ class Call {
 	bool debug_recording;
 	bool encrypted;
 	bool emergency;
+	bool analog;
     char filename[160];
     char status_filename[160];
 	int tdma;
@@ -53,5 +54,7 @@ public:
 	bool get_encrypted();
 	void set_emergency(bool m);
 	bool get_emergency();
+	void set_analog();
+	bool get_analog();
 };
 #endif

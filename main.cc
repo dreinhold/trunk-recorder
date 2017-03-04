@@ -77,6 +77,7 @@ volatile sig_atomic_t exit_flag = 0;
 SmartnetParser *smartnet_parser;
 P25Parser *p25_parser;
 
+ofstream heart_beat_file;
 
 
 void exit_interupt(int sig) { // can be called asynchronously
@@ -618,6 +619,11 @@ void monitor_messages() {
             lastMsgCountTime = currentTime;
             if (msgs_decoded_per_second < 10 ) {
                 BOOST_LOG_TRIVIAL(error) << "\tControl Channel Message Decode Rate: " << msgs_decoded_per_second << "/sec";
+            } else {
+                // Update heart beat file
+                heart_beat_file.seekp(0);
+                heart_beat_file << currentTime << endl;
+                heart_beat_file.flush();  
             }
         }
 
@@ -676,7 +682,8 @@ int main(void)
     (
      logging::trivial::severity >= logging::trivial::info
      );
-
+    // Open file used to check heart_beat
+    heart_beat_file.open("heart_beat.txt");
     tb = gr::make_top_block("Trunking");
     msg_queue = gr::msg_queue::make(100);
     smartnet_parser = new SmartnetParser(); // this has to eventually be generic;
